@@ -117,6 +117,20 @@ main {
   color: #ccc;
 }
 
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.volume-control input[type="range"] {
+  width: 90px;
+  accent-color: #e8a838;
+  cursor: pointer;
+}
+
 #sheet-area {
   background: #232323;
   border-radius: 8px;

@@ -48,26 +48,37 @@ function pickNote() {
   return { midi, clef, map };
 }
 
-function showNote() {
-  state.waiting = true;
-  clearFeedback();
-
-  const { midi, clef, map } = pickNote();
-  const noteToken = map[midi] + '4';
-
+function renderNote(midi, clef) {
+  const map = clef === 'treble' ? TREBLE_NOTES : BASS_NOTES;
+  const noteToken = map[midi] + '1';
   const abc = clef === 'treble'
     ? buildABC(noteToken, 'z4')
     : buildABC('z4', noteToken);
-
   ABCJS.renderAbc('notation', abc, {
     responsive: 'resize',
-    scale: 1.4,
+    scale: 1.5,
     paddingtop: 20,
     paddingbottom: 20,
-    paddingleft: 20,
-    paddingright: 20
+    paddingleft: 40,
+    paddingright: 40
   });
 }
+
+function showNote() {
+  state.waiting = true;
+  clearFeedback();
+  const { midi, clef } = pickNote();
+  renderNote(midi, clef);
+}
+
+function repeatNote() {
+  state.waiting = true;
+  clearFeedback();
+  renderNote(state.currentMidi, state.currentClef);
+}
+
+const successAudio = new Audio('success.mp3');
+const failAudio = new Audio('fail.mp3');
 
 function checkNote(playedMidi) {
   if (!state.waiting) return;
@@ -80,19 +91,25 @@ function checkNote(playedMidi) {
   if (playedClass === expectedClass) {
     state.correct++;
     showFeedback('Correct!', true);
+    updateScore();
+    setTimeout(() => showNote(), 200);
   } else {
     const expected = PITCH_CLASS_NAMES[expectedClass] ?? '?';
     const played = PITCH_CLASS_NAMES[playedClass] ?? `MIDI ${playedMidi}`;
     showFeedback(`Wrong — you played ${played}, expected ${expected}`, false);
+    updateScore();
+    setTimeout(() => repeatNote(), 800);
   }
-
-  updateScore();
-  setTimeout(() => showNote(), 1500);
 }
 
 function showFeedback(msg, correct) {
   const el = document.getElementById('feedback');
   el.textContent = msg;
+  if (correct) {
+    successAudio.play();
+  } else {
+    failAudio.play();
+  }
   el.className = correct ? 'correct' : 'wrong';
   el.style.opacity = '1';
 }
@@ -152,6 +169,12 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
 
 document.getElementById('skip-btn').addEventListener('click', () => {
   if (state.waiting) showNote();
+});
+
+document.getElementById('volume-slider').addEventListener('input', (e) => {
+  const vol = parseFloat(e.target.value);
+  successAudio.volume = vol;
+  failAudio.volume = vol;
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
