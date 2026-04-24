@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sight Reading</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/abcjs@6.6.2/dist/abcjs-basic-min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Sight Reading</h1>
+    <div class="header-right">
+      <span id="score-display">Score: 0 / 0</span>
+      <span id="midi-status" class="midi-err">MIDI: Not Connected</span>
+    </div>
+  </header>
+
+  <main>
+    <section id="controls">
+      <div class="mode-group">
+        <button class="mode-btn active" data-mode="right">Right Hand</button>
+        <button class="mode-btn" data-mode="left">Left Hand</button>
+        <button class="mode-btn" data-mode="both">Both</button>
+      </div>
+      <button id="skip-btn">Skip</button>
+    </section>
+
+    <section id="sheet-area">
+      <div id="notation"></div>
+    </section>
+
+    <div id="feedback"></div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

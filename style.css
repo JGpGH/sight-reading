@@ -1,0 +1,149 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: #1a1a2e;
+  color: #eee;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: #16213e;
+  border-bottom: 1px solid #0f3460;
+}
+
+header h1 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+#score-display {
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+#midi-status {
+  font-size: 0.85rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+#midi-status.midi-ok {
+  background: #1b4332;
+  color: #4caf50;
+  border: 1px solid #4caf50;
+}
+
+#midi-status.midi-err {
+  background: #3b1111;
+  color: #f44336;
+  border: 1px solid #f44336;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1rem;
+  gap: 1.5rem;
+}
+
+#controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.mode-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mode-btn {
+  padding: 0.5rem 1.1rem;
+  border: 2px solid #e8a838;
+  background: transparent;
+  color: #e8a838;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mode-btn:hover {
+  background: rgba(232, 168, 56, 0.15);
+}
+
+.mode-btn.active {
+  background: #e8a838;
+  color: #1a1a2e;
+}
+
+#skip-btn {
+  padding: 0.5rem 1.1rem;
+  border: 2px solid #555;
+  background: transparent;
+  color: #aaa;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+#skip-btn:hover {
+  border-color: #888;
+  color: #ccc;
+}
+
+#sheet-area {
+  background: #232323;
+  border-radius: 8px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
+  width: 90%;
+  padding: 1.5rem 2rem;
+}
+
+#notation svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+#feedback {
+  font-size: 1.6rem;
+  font-weight: 700;
+  min-height: 2.5rem;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+#feedback.correct {
+  color: #4caf50;
+}
+
+#feedback.wrong {
+  color: #f44336;
+}
