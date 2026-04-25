@@ -3,22 +3,57 @@ const TREBLE_NOTES = {
   72: 'c',  74: 'd',  76: 'e',  77: 'f',  79: 'g',  81: 'a',  83: 'b'
 };
 
+const TREBLE_FLATS = {
+  61: '_D',  63: '_E',  66: '_G',  68: '_A',  70: '_B',
+  73: '_d',  75: '_e',  78: '_g',  80: '_a',  82: '_b'
+};
+
+const TREBLE_SHARPS = {
+  61: '^C',  63: '^D',  66: '^F',  68: '^G',  70: '^A',
+  73: '^c',  75: '^d',  78: '^f',  80: '^g',  82: '^a'
+};
+
 const BASS_NOTES = {
   36: 'C,,', 38: 'D,,', 40: 'E,,', 41: 'F,,', 43: 'G,,', 45: 'A,,', 47: 'B,,',
   48: 'C,',  50: 'D,',  52: 'E,',  53: 'F,',  55: 'G,',  57: 'A,',  59: 'B,'
 };
 
+const BASS_FLATS = {
+  37: '_D,,', 39: '_E,,', 42: '_G,,', 44: '_A,,', 46: '_B,,',
+  49: '_D,',  51: '_E,',  54: '_G,',  56: '_A,',  58: '_B,'
+};
+
+const BASS_SHARPS = {
+  37: '^C,,', 39: '^D,,', 42: '^F,,', 44: '^G,,', 46: '^A,,',
+  49: '^C,',  51: '^D,',  54: '^F,',  56: '^G,',  58: '^A,'
+};
+
 // pitch class (midiNote % 12) → letter name
-const PITCH_CLASS_NAMES = { 0: 'C', 2: 'D', 4: 'E', 5: 'F', 7: 'G', 9: 'A', 11: 'B' };
+const PITCH_CLASS_NAMES = {
+  0: 'C', 1: 'Db', 2: 'D', 3: 'Eb', 4: 'E', 5: 'F',
+  6: 'Gb', 7: 'G', 8: 'Ab', 9: 'A', 10: 'Bb', 11: 'B'
+};
 
 const state = {
   mode: 'right',
   currentMidi: null,
   currentClef: 'treble',
+  currentToken: null,
   correct: 0,
   total: 0,
   waiting: true
 };
+
+function getEntries(clef) {
+  const naturals = clef === 'treble' ? TREBLE_NOTES : BASS_NOTES;
+  const flats    = clef === 'treble' ? TREBLE_FLATS : BASS_FLATS;
+  const sharps   = clef === 'treble' ? TREBLE_SHARPS : BASS_SHARPS;
+  return [
+    ...Object.entries(naturals),
+    ...Object.entries(flats),
+    ...Object.entries(sharps),
+  ];
+}
 
 function buildABC(trebleToken, bassToken) {
   return [
@@ -41,17 +76,15 @@ function pickNote() {
   else clef = Math.random() < 0.5 ? 'treble' : 'bass';
 
   state.currentClef = clef;
-  const map = clef === 'treble' ? TREBLE_NOTES : BASS_NOTES;
-  const keys = Object.keys(map);
-  const midi = parseInt(keys[Math.floor(Math.random() * keys.length)]);
-  state.currentMidi = midi;
-  return { midi, clef, map };
+  const entries = getEntries(clef).filter(([m]) => parseInt(m) !== state.currentMidi);
+  const [midiStr, token] = entries[Math.floor(Math.random() * entries.length)];
+  state.currentMidi = parseInt(midiStr);
+  state.currentToken = token;
 }
 
-function renderNote(midi, clef) {
-  const map = clef === 'treble' ? TREBLE_NOTES : BASS_NOTES;
-  const noteToken = map[midi] + '1';
-  const abc = clef === 'treble'
+function renderNote() {
+  const noteToken = state.currentToken + '1';
+  const abc = state.currentClef === 'treble'
     ? buildABC(noteToken, 'z4')
     : buildABC('z4', noteToken);
   ABCJS.renderAbc('notation', abc, {
@@ -67,17 +100,19 @@ function renderNote(midi, clef) {
 function showNote() {
   state.waiting = true;
   clearFeedback();
-  const { midi, clef } = pickNote();
-  renderNote(midi, clef);
+  pickNote();
+  renderNote();
 }
 
 function repeatNote() {
   state.waiting = true;
   clearFeedback();
-  renderNote(state.currentMidi, state.currentClef);
+  renderNote();
 }
 
-const successAudio = new Audio('success.mp3');
+const noteAudios = Object.fromEntries(
+  ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'].map(n => [n, new Audio(`notes/${n}.mp3`)])
+);
 const failAudio = new Audio('fail.mp3');
 
 function checkNote(playedMidi) {
@@ -90,6 +125,7 @@ function checkNote(playedMidi) {
 
   if (playedClass === expectedClass) {
     state.correct++;
+    noteAudios[PITCH_CLASS_NAMES[expectedClass]].play();
     showFeedback('Correct!', true);
     updateScore();
     setTimeout(() => showNote(), 200);
@@ -105,9 +141,7 @@ function checkNote(playedMidi) {
 function showFeedback(msg, correct) {
   const el = document.getElementById('feedback');
   el.textContent = msg;
-  if (correct) {
-    successAudio.play();
-  } else {
+  if (!correct) {
     failAudio.play();
   }
   el.className = correct ? 'correct' : 'wrong';
@@ -163,21 +197,33 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     state.mode = btn.dataset.mode;
+    dismissOverlay();
     showNote();
   });
 });
 
 document.getElementById('skip-btn').addEventListener('click', () => {
+  dismissOverlay();
   if (state.waiting) showNote();
 });
 
 document.getElementById('volume-slider').addEventListener('input', (e) => {
   const vol = parseFloat(e.target.value);
-  successAudio.volume = vol;
+  Object.values(noteAudios).forEach(a => { a.volume = vol; });
   failAudio.volume = vol;
+});
+
+function dismissOverlay() {
+  document.getElementById('play-overlay').style.display = 'none';
+  document.getElementById('sheet-area').classList.add('ready');
+  document.getElementById('notation').classList.add('visible');
+}
+
+document.getElementById('play-btn').addEventListener('click', () => {
+  dismissOverlay();
+  showNote();
 });
 
 document.addEventListener('DOMContentLoaded', async () => {
   await initMIDI();
-  showNote();
 });

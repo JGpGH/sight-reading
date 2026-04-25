@@ -136,7 +136,46 @@ main {
   border-radius: 8px;
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5);
   width: 90%;
+  position: relative;
+}
+
+#sheet-area.ready {
   padding: 1.5rem 2rem;
+}
+
+#notation {
+  display: none;
+}
+
+#notation.visible {
+  display: block;
+}
+
+#play-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+#play-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid #e8a838;
+  background: transparent;
+  color: #e8a838;
+  font-size: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+#play-btn:hover {
+  background: #e8a838;
+  color: #1a1a2e;
 }
 
 #notation svg {
